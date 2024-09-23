@@ -1,0 +1,44 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+Description: AWS Lambda function to update Google Sheets
+
+Globals:
+  Function:
+    Timeout: 10
+
+Resources:
+  GoogleSheetsUpdaterFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ./
+      Handler: index.handler
+      Runtime: nodejs16.x
+      Architectures:
+        - x86_64
+      Events:
+        UpdateSheet:
+          Type: Api
+          Properties:
+            Path: /update-sheet
+            Method: post
+      Environment:
+        Variables:
+          SPREADSHEET_ID: !Ref SpreadsheetId
+          GOOGLE_CLIENT_EMAIL: !Ref GoogleClientEmail
+          GOOGLE_PRIVATE_KEY: !Ref GooglePrivateKey
+
+Parameters:
+  SpreadsheetId:
+    Type: String
+    Description: ID of the Google Spreadsheet to update
+  GoogleClientEmail:
+    Type: String
+    Description: Google Service Account client email
+  GooglePrivateKey:
+    Type: String
+    Description: Google Service Account private key
+
+Outputs:
+  WebEndpoint:
+    Description: "API Gateway endpoint URL for Prod stage"
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/update-sheet/"
